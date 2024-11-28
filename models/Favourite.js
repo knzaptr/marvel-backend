@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const Favourite = mongoose.model("Favourite", {
-  favouriteCharCom: String,
+  favouriteCharCom: Object,
   type: String,
   account: {
     type: mongoose.Schema.Types.ObjectId,

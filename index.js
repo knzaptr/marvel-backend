@@ -29,6 +29,6 @@ app.all("*", (req, res) => {
   return res.status(404).json({ error: "This route does not exist 🤔" });
 });
 
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT || 3001, () => {
   console.log("Server started 🚀");
 });

@@ -7,31 +7,35 @@ const isAuthenticated = require("../middlewares/isAuthenticated");
 
 const router = express.Router();
 
-/* Add charcter or comic to favorite table*/
+/* Add and delete charcter or comic to and from favorite table*/
 router.post("/favourite", isAuthenticated, async (req, res) => {
   try {
-    const { favourite_id, type } = req.body;
-    const favourite = await Favourite.findOne(req.body);
-
-    if (favourite) {
-      return res.status(409).json({ message: "Already in favourite ♥️" });
-    } else if (!favourite_id || !type) {
-      return res.status(400).json({ message: "Missing parameter 😗" });
-    }
-
-    const favouriteExist = await axios.get(
-      `${process.env.API}/${type}/${favourite_id}?apiKey=${process.env.API_KEY}`
-    );
-
-    const newFavourite = new Favourite({
-      favourite_id: favourite_id,
-      type: type,
+    const { favouriteCharCom, type } = req.body;
+    const favourite = await Favourite.findOne({
       account: req.user.id,
+      favouriteCharCom: favouriteCharCom,
+      type: type,
     });
 
-    await newFavourite.save();
+    if (favourite) {
+      await Favourite.findOneAndDelete({
+        account: req.user.id,
+        favouriteCharCom: favouriteCharCom,
+        type: type,
+      });
+      return res.status(409).json({ message: "Remove from fav! 💔" });
+    } else if (!favouriteCharCom || !type) {
+      return res.status(400).json({ message: "Missing parameter 😗" });
+    } else {
+      const newFavourite = new Favourite({
+        favouriteCharCom: favouriteCharCom,
+        type: type,
+        account: req.user.id,
+      });
 
-    return res.status(201).json(newFavourite);
+      await newFavourite.save();
+      return res.status(201).json(newFavourite);
+    }
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -40,35 +44,15 @@ router.post("/favourite", isAuthenticated, async (req, res) => {
 /* Get a list of favourite comics and characters */
 router.get("/favourite", isAuthenticated, async (req, res) => {
   try {
-    const favourites = await Favourite.find({ account: req.user.id });
+    const favourites = await Favourite.find({ account: req.user.id }).select(
+      "-_id -account -__v"
+    );
     const total = await Favourite.countDocuments({ account: req.user.id });
-    let fav = { count: total };
-    let results = [];
-    for (const favourite of favourites) {
-      const response = await axios.get(
-        `${process.env.API}/${favourite.type}/${favourite.favourite_id}?apiKey=${process.env.API_KEY}`
-      );
-
-      results.push(response.data);
-    }
-    fav.results = results;
-
+    const fav = { count: total, results: favourites };
     return res.status(200).json(fav);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 });
 
-/* Delete a comic or character */
-router.delete("/favourite/:favId", isAuthenticated, async (req, res) => {
-  try {
-    const favToRemove = await Favourite.findOneAndDelete({
-      account: req.user.id,
-      favourite_id: req.params.favId,
-    });
-    return res.status(200).json("Remove from fav! 💔");
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-});
 module.exports = router;

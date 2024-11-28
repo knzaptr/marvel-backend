@@ -7,8 +7,21 @@ require("dotenv").config();
 /*Get a list of comics*/
 router.get("/comics", async (req, res) => {
   try {
+    let limit = 100;
+    let filters = "";
+
+    if (req.query.title) {
+      filters += `&title=${req.query.title}`;
+    }
+    if (req.query.limit) {
+      limit = req.query.limit;
+    }
+    if (req.query.page) {
+      filters += `&skip=${(req.query.page - 1) * limit}`;
+    }
+
     const response = await axios.get(
-      `${process.env.API}/comics?apiKey=${process.env.API_KEY}`
+      `${process.env.API}/comics?apiKey=${process.env.API_KEY}${filters}&limit=${limit}`
     );
     return res.status(200).json(response.data);
   } catch (error) {
