@@ -23,7 +23,7 @@ router.post("/favourite", isAuthenticated, async (req, res) => {
         favouriteCharCom: favouriteCharCom,
         type: type,
       });
-      return res.status(409).json({ message: "Remove from fav! 💔" });
+      return res.status(200).json({ message: "Remove from fav! 💔" });
     } else if (!favouriteCharCom || !type) {
       return res.status(400).json({ message: "Missing parameter 😗" });
     } else {
