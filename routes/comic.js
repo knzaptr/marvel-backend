@@ -7,7 +7,7 @@ require("dotenv").config();
 /*Get a list of comics*/
 router.get("/comics", async (req, res) => {
   try {
-    let limit = 100;
+    let limit = 20;
     let filters = "";
 
     if (req.query.title) {

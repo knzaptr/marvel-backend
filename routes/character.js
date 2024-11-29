@@ -7,7 +7,7 @@ require("dotenv").config();
 /* Get a list of characters */
 router.get("/characters", async (req, res) => {
   try {
-    let limit = 100;
+    let limit = 20;
     let filters = "";
     if (req.query.name) {
       filters += `&name=${req.query.name}`;
